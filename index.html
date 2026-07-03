@@ -113,6 +113,24 @@ th {
   text-align:left;
   white-space:nowrap;
 }
+th.sortable {
+  cursor:pointer;
+  user-select:none;
+}
+th.sortable:hover,
+th.sortable:focus-visible {
+  background:#3d424b;
+  outline:none;
+}
+th.sortable.sorted {
+  background:#1f5fbf;
+}
+.sort-mark {
+  display:inline-block;
+  min-width:1em;
+  margin-left:3px;
+  font-size:10px;
+}
 td {
   border-top:1px solid var(--line);
   padding:7px 8px;
@@ -301,17 +319,17 @@ tr:hover td {
     <table id="db">
       <thead>
         <tr>
-          <th>ロゴ/会社</th>
-          <th>商品/系統</th>
-          <th>月額</th>
-          <th>上限</th>
+          <th class="sortable" data-sort="brand" tabindex="0" role="button" aria-sort="none">ロゴ/会社 <span class="sort-mark" aria-hidden="true"></span></th>
+          <th class="sortable" data-sort="product" tabindex="0" role="button" aria-sort="none">商品/系統 <span class="sort-mark" aria-hidden="true"></span></th>
+          <th class="sortable" data-sort="price" tabindex="0" role="button" aria-sort="none">月額 <span class="sort-mark" aria-hidden="true"></span></th>
+          <th class="sortable" data-sort="limit" tabindex="0" role="button" aria-sort="none">上限 <span class="sort-mark" aria-hidden="true"></span></th>
           <th>破損</th>
           <th>故障</th>
           <th>水濡れ</th>
           <th>盗難</th>
           <th>紛失</th>
-          <th>自己負担</th>
-          <th>損害率</th>
+          <th class="sortable" data-sort="deductible" tabindex="0" role="button" aria-sort="none">自己負担 <span class="sort-mark" aria-hidden="true"></span></th>
+          <th class="sortable" data-sort="ratio" tabindex="0" role="button" aria-sort="none">損害率 <span class="sort-mark" aria-hidden="true"></span></th>
           <th>公式</th>
         </tr>
       </thead>
@@ -1734,6 +1752,8 @@ const rows = [...document.querySelectorAll('#db tbody tr')];
 const q = document.getElementById('q');
 const shownCount = document.getElementById('shownCount');
 let activeFilter = 'all';
+let activeSort = { key: null, direction: 'asc' };
+const sortableHeaders = [...document.querySelectorAll('th[data-sort]')];
 
 function matchFilter(row, filter) {
   if (filter === 'all') return true;
@@ -1752,6 +1772,85 @@ function apply() {
     if (show) count++;
   });
   shownCount.textContent = count;
+  sortRows();
+}
+
+function cellText(row, selector) {
+  return (row.querySelector(selector)?.textContent || '').trim();
+}
+
+function normalizeText(text) {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function parsePrice(row) {
+  const raw = Number(row.dataset.price);
+  const text = cellText(row, '.price');
+  if (Number.isFinite(raw) && /\d/.test(text) && !['—', '要確認', '都度', 'カード年会費内', 'セットオプション'].some(word => text.includes(word))) {
+    return raw;
+  }
+  return null;
+}
+
+function parseMoneyText(text) {
+  const compact = text.replace(/[,，]/g, '');
+  const matches = [...compact.matchAll(/(\d+(?:\.\d+)?)\s*(万円|円)?/g)];
+  if (!matches.length) return null;
+  return Math.max(...matches.map(match => {
+    const value = Number(match[1]);
+    return match[2] === '万円' ? value * 10000 : value;
+  }));
+}
+
+function sortValue(row, key) {
+  if (key === 'brand') return { type: 'text', value: normalizeText(cellText(row, '.brand-name')) };
+  if (key === 'product') return { type: 'text', value: normalizeText(`${cellText(row, '.product strong')} ${cellText(row, '.group-pill')}`) };
+  if (key === 'price') return { type: 'number', value: parsePrice(row) };
+  if (key === 'limit') return { type: 'number', value: parseMoneyText(cellText(row, '.limit')) };
+  if (key === 'deductible') return { type: 'number', value: parseMoneyText(cellText(row, '.deductible')) };
+  if (key === 'ratio') return { type: 'number', value: parseFloat(cellText(row, '.ratio strong').replace('%', '')) };
+  return { type: 'text', value: '' };
+}
+
+function compareRows(a, b) {
+  if (!activeSort.key) return rows.indexOf(a) - rows.indexOf(b);
+  const av = sortValue(a, activeSort.key);
+  const bv = sortValue(b, activeSort.key);
+  const aMissing = av.value === null || av.value === '' || Number.isNaN(av.value);
+  const bMissing = bv.value === null || bv.value === '' || Number.isNaN(bv.value);
+  if (aMissing || bMissing) {
+    if (aMissing && bMissing) return rows.indexOf(a) - rows.indexOf(b);
+    return aMissing ? 1 : -1;
+  }
+  let result = av.type === 'number'
+    ? av.value - bv.value
+    : String(av.value).localeCompare(String(bv.value), 'ja', { numeric:true, sensitivity:'base' });
+  if (result === 0) return rows.indexOf(a) - rows.indexOf(b);
+  return activeSort.direction === 'asc' ? result : -result;
+}
+
+function updateSortHeaders() {
+  sortableHeaders.forEach(th => {
+    const isActive = th.dataset.sort === activeSort.key;
+    th.classList.toggle('sorted', isActive);
+    th.setAttribute('aria-sort', isActive ? (activeSort.direction === 'asc' ? 'ascending' : 'descending') : 'none');
+    th.querySelector('.sort-mark').textContent = isActive ? (activeSort.direction === 'asc' ? '▲' : '▼') : '';
+  });
+}
+
+function sortRows() {
+  if (!activeSort.key) return;
+  const tbody = document.querySelector('#db tbody');
+  [...rows].sort(compareRows).forEach(row => tbody.appendChild(row));
+  updateSortHeaders();
+}
+
+function toggleSort(key) {
+  activeSort = {
+    key,
+    direction: activeSort.key === key && activeSort.direction === 'asc' ? 'desc' : 'asc'
+  };
+  sortRows();
 }
 
 buttons.forEach(btn => {
@@ -1760,6 +1859,16 @@ buttons.forEach(btn => {
     btn.classList.add('active');
     activeFilter = btn.dataset.filter;
     apply();
+  });
+});
+
+sortableHeaders.forEach(th => {
+  th.addEventListener('click', () => toggleSort(th.dataset.sort));
+  th.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleSort(th.dataset.sort);
+    }
   });
 });
 
