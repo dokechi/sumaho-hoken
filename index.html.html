@@ -1,0 +1,1770 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>スマホ保険・端末補償 全集計DB v2 compact</title>
+<style>
+:root {
+  --black:#202124;
+  --gray:#5f6368;
+  --line:#d9dde3;
+  --dark:#30343b;
+  --red:#d93025;
+  --green:#0b8f3c;
+  --blue:#1a73e8;
+  --soft:#f7f8fa;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:#fff;
+  color:var(--black);
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  line-height:1.35;
+}
+.wrap {
+  max-width:1880px;
+  margin:0 auto;
+  padding:10px 12px 24px;
+}
+.topbar {
+  display:grid;
+  grid-template-columns: 280px minmax(220px, 420px) 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin-bottom:8px;
+}
+h1 {
+  margin:0;
+  font-size:20px;
+  letter-spacing:.01em;
+  white-space:nowrap;
+}
+.searchbox input {
+  width:100%;
+  height:34px;
+  border:1px solid #cfd5dd;
+  border-radius:999px;
+  padding:0 13px;
+  font-size:13px;
+  font-weight:800;
+}
+.filters {
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  white-space:nowrap;
+  padding-bottom:2px;
+}
+.filters::-webkit-scrollbar { height:6px; }
+.filters::-webkit-scrollbar-thumb { background:#cfd5dd; border-radius:999px; }
+button {
+  flex:0 0 auto;
+  border:1px solid #d4d9e0;
+  background:#fff;
+  color:#30343b;
+  border-radius:999px;
+  padding:7px 10px;
+  font-weight:850;
+  font-size:11.5px;
+  cursor:pointer;
+}
+button.active {
+  background:var(--dark);
+  color:#fff;
+  border-color:var(--dark);
+}
+.count {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  color:var(--gray);
+  font-size:12px;
+  font-weight:850;
+  white-space:nowrap;
+}
+.count strong {
+  font-size:20px;
+  color:var(--black);
+}
+.tablebox {
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:12px;
+  height:calc(100vh - 64px);
+}
+table {
+  width:100%;
+  min-width:1320px;
+  border-collapse:separate;
+  border-spacing:0;
+  background:#fff;
+}
+th {
+  position:sticky;
+  top:0;
+  z-index:3;
+  background:var(--dark);
+  color:#fff;
+  padding:9px 8px;
+  font-size:12px;
+  text-align:left;
+  white-space:nowrap;
+}
+td {
+  border-top:1px solid var(--line);
+  padding:7px 8px;
+  vertical-align:middle;
+  font-size:12px;
+}
+tr:hover td {
+  background:#fbfcff;
+}
+.brand {
+  width:132px;
+}
+.logo-box {
+  width:105px;
+  height:27px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  margin-bottom:2px;
+  text-decoration:none;
+}
+.logo-box img {
+  max-width:102px;
+  max-height:25px;
+  object-fit:contain;
+  display:block;
+}
+.fallback {
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #d0d4da;
+  border-radius:999px;
+  padding:3px 8px;
+  color:#202124;
+  font-weight:900;
+  background:#f7f8fa;
+  font-size:11px;
+}
+.fallback.show {
+  display:inline-flex;
+}
+.brand-name {
+  color:#5f6368;
+  font-weight:800;
+  font-size:10.5px;
+  max-width:128px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.product {
+  min-width:210px;
+}
+.product strong {
+  display:block;
+  font-size:12.5px;
+  margin:2px 0;
+}
+.group-pill {
+  display:inline-block;
+  border:1px solid #e0e3e8;
+  background:#fafbfc;
+  border-radius:999px;
+  color:#5f6368;
+  font-size:10px;
+  padding:1px 6px;
+  font-weight:900;
+}
+.badge {
+  display:inline-block;
+  margin-right:3px;
+  border-radius:999px;
+  padding:1px 6px;
+  font-size:9.5px;
+  font-weight:900;
+}
+.badge.rec { background:#fff1b8; color:#7a5300; }
+.badge.stop { background:#fde8e5; color:#b3261e; }
+.badge.conf { background:#eef2ff; color:#263b8f; }
+.price {
+  color:var(--red);
+  font-weight:950;
+  font-size:16px;
+  white-space:nowrap;
+}
+.limit {
+  font-weight:850;
+  min-width:112px;
+  max-width:150px;
+}
+.limit span {
+  display:block;
+  color:#5f6368;
+  font-size:10px;
+  font-weight:800;
+}
+.mark {
+  display:inline-flex;
+  width:22px;
+  height:22px;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  font-size:16px;
+  font-weight:950;
+}
+.mark.yes { color:var(--green); }
+.mark.no { color:var(--red); }
+.mark.maybe { color:#a66a00; font-size:11px; white-space:nowrap; width:auto; }
+.mark.neutral { color:#5f6368; font-size:11px; width:auto; }
+.deductible {
+  font-weight:850;
+  white-space:nowrap;
+}
+.ratio {
+  min-width:86px;
+  cursor:help;
+}
+.ratio strong {
+  display:block;
+  font-size:13px;
+}
+.ratio span {
+  display:inline-block;
+  margin-top:1px;
+  border-radius:999px;
+  padding:1px 6px;
+  font-size:9.5px;
+  font-weight:900;
+}
+.ratio-ok span { background:#e8f5ee; color:#087438; }
+.ratio-midlow span { background:#fff2cc; color:#7a5300; }
+.ratio-low span { background:#fde8e5; color:#b3261e; }
+.ratio-unknown span { background:#f1f3f4; color:#5f6368; }
+.ratio-neutral span { background:#f1f3f4; color:#5f6368; }
+.source a {
+  display:inline-block;
+  color:#1a73e8;
+  font-weight:950;
+  text-decoration:none;
+  border:1px solid #cbd8ef;
+  border-radius:999px;
+  padding:2px 8px;
+  background:#f4f8ff;
+  white-space:nowrap;
+}
+.hidden { display:none !important; }
+@media (max-width:1000px) {
+  .wrap { padding:8px; }
+  .topbar { grid-template-columns:1fr; }
+  h1 { font-size:18px; }
+  .count { justify-content:flex-start; }
+  .tablebox { height:calc(100vh - 150px); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1>スマホ保険DB v2</h1>
+    <div class="searchbox">
+      <input id="q" placeholder="検索：クロネコ、紛失、5万円、さくら">
+    </div>
+    <div class="filters" id="filters">
+      <button class="active" data-filter="all">すべて</button>
+      <button data-filter="independent">独立型</button>
+      <button data-filter="multi">複数端末</button>
+      <button data-filter="service">サービス付帯</button>
+      <button data-filter="card">カード付帯</button>
+      <button data-filter="purchase">購入連動</button>
+      <button data-filter="lowlimit">5万円前後</button>
+      <button data-filter="ten">10万円</button>
+      <button data-filter="over10">10万円超</button>
+      <button data-filter="under200">200円以下</button>
+      <button data-filter="water">水濡れ</button>
+      <button data-filter="theft">盗難</button>
+      <button data-filter="loss">紛失</button>
+      <button data-filter="review">要確認</button>
+      <button data-filter="excluded">除外</button>
+    </div>
+    <div class="count">表示 <strong id="shownCount">56</strong> / 56</div>
+  </div>
+
+  <div class="tablebox">
+    <table id="db">
+      <thead>
+        <tr>
+          <th>ロゴ/会社</th>
+          <th>商品/系統</th>
+          <th>月額</th>
+          <th>上限</th>
+          <th>破損</th>
+          <th>故障</th>
+          <th>水濡れ</th>
+          <th>盗難</th>
+          <th>紛失</th>
+          <th>自己負担</th>
+          <th>損害率</th>
+          <th>公式</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-tags="independent lowlimit under200 damage" data-group="独立型" data-band="5万円以下" data-price="200" data-search="独立型 false クロネコ / mysurance mysurance スマホもしも保険 ライト 200円 200 1事故5万円 / 通算10万円 5万円以下 ○ × × × × 3,000円 47.9% 2024年度・費用/利益保険・正味 自然 高 現行 破損・汚損のみ。購入後1年以内。docomo/au/softbank以外向け。 https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/ https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/img/logo.png independent lowlimit under200 damage">
+<td class="brand">
+<a class="logo-box" href="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/" rel="noopener" target="_blank">
+<img alt="クロネコ / Mysurance logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/img/logo.png"/>
+<span class="fallback">クロネコ / Mysurance</span>
+</a>
+<div class="brand-name">クロネコ / Mysurance</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホもしも保険 ライト</strong>
+</td>
+<td class="price">200円</td>
+<td class="limit">1事故5万円 / 通算10万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-ok" title="Mysurance 2024年度・費用/利益保険・正味 / 破損・汚損のみ。購入後1年以内。docomo/au/SoftBank以外向け。">
+<strong>47.9%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent standard ten water theft loss recommend" data-group="独立型" data-band="10万円" data-price="470" data-search="独立型 false クロネコ / mysurance mysurance スマホもしも保険 スタンダード 470円 470 1事故10万円 / 通算20万円 10万円 ○ ○ ○ ○ ○ 3,000円 47.9% 2024年度・費用/利益保険・正味 自然 高 現行 10万円部門の総合本命候補。盗難・紛失は50％系。 https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/ https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/img/logo.png independent standard ten water theft loss recommend">
+<td class="brand">
+<a class="logo-box" href="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/" rel="noopener" target="_blank">
+<img alt="クロネコ / Mysurance logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/img/logo.png"/>
+<span class="fallback">クロネコ / Mysurance</span>
+</a>
+<div class="brand-name">クロネコ / Mysurance</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホもしも保険 スタンダード</strong>
+<span class="badge rec">候補</span>
+</td>
+<td class="price">470円</td>
+<td class="limit">1事故10万円 / 通算20万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-ok" title="Mysurance 2024年度・費用/利益保険・正味 / 10万円部門の総合本命候補。盗難・紛失は50％系。">
+<strong>47.9%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent high over10 over20 water theft loss recommend" data-group="独立型" data-band="10万円超" data-price="790" data-search="独立型 false クロネコ / mysurance mysurance スマホもしも保険 プロ 790円 790 1事故20万円 / 通算40万円 10万円超 ○ ○ ○ ○ ○ 0円 47.9% 2024年度・費用/利益保険・正味 自然 高 現行 20万円部門の本命候補。盗難・紛失は50％系。 https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/ https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/img/logo.png independent high over10 over20 water theft loss recommend">
+<td class="brand">
+<a class="logo-box" href="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/" rel="noopener" target="_blank">
+<img alt="クロネコ / Mysurance logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/img/logo.png"/>
+<span class="fallback">クロネコ / Mysurance</span>
+</a>
+<div class="brand-name">クロネコ / Mysurance</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホもしも保険 プロ</strong>
+<span class="badge rec">候補</span>
+</td>
+<td class="price">790円</td>
+<td class="limit">1事故20万円 / 通算40万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-ok" title="Mysurance 2024年度・費用/利益保険・正味 / 20万円部門の本命候補。盗難・紛失は50％系。">
+<strong>47.9%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://www.kuronekoyamato.co.jp/ytc/campaign/insurance/smartphone/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent student derivative" data-group="独立型/派生" data-band="10万円超" data-price="200" data-search="独立型/派生 false mysurance mysurance 学生スマホ保険 200円〜 200 最大20万円 10万円超 ○ プラン別 プラン別 プラン別 プラン別 プラン別 47.9% 2024年度・費用/利益保険・正味 自然 中 現行 学生向け派生。格安sim利用端末向け。通常版と重複するためサイトでは派生扱い。 https://www.mysurance.co.jp/service/sumaho-hoken/gakusuma/  independent student derivative">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.mysurance.co.jp/service/sumaho-hoken/gakusuma/" rel="noopener" target="_blank">
+<span class="fallback show">Mysurance</span>
+</a>
+<div class="brand-name">Mysurance</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型/派生</div>
+<strong>学生スマホ保険</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">200円〜</td>
+<td class="limit">最大20万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">プラン別</span></td>
+<td><span class="mark maybe">プラン別</span></td>
+<td><span class="mark maybe">プラン別</span></td>
+<td><span class="mark maybe">プラン別</span></td>
+<td class="deductible">プラン別</td>
+<td class="ratio ratio-ok" title="Mysurance 2024年度・費用/利益保険・正味 / 学生向け派生。格安SIM利用端末向け。通常版と重複するためサイトでは派生扱い。">
+<strong>47.9%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://www.mysurance.co.jp/service/sumaho-hoken/gakusuma/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit under200 cheap aeon" data-group="独立型" data-band="5万円以下" data-price="100" data-search="独立型 イオン少額短期 イオン少額短期 イオンのスマホ保険 スーパーライト 100円 100 1.5万円 5万円以下 ○ ○ × × × 3,000円 13.3% 2024年度・費用保険・正味 低め 高 現行 最安級。水濡れなし。盗難・紛失なし。 https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png independent lowlimit under200 cheap aeon">
+<td class="brand">
+<a class="logo-box" href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">
+<img alt="イオン少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png"/>
+<span class="fallback">イオン少額短期</span>
+</a>
+<div class="brand-name">イオン少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>イオンのスマホ保険 スーパーライト</strong>
+</td>
+<td class="price">100円</td>
+<td class="limit">1.5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-midlow" title="イオン少額短期 2024年度・費用保険・正味 / 最安級。水濡れなし。盗難・紛失なし。">
+<strong>13.3%</strong>
+<span>低め</span>
+</td>
+<td class="source"><a href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit under200 cheap theft loss" data-group="独立型" data-band="5万円以下" data-price="150" data-search="独立型 イオン少額短期 イオン少額短期 スーパーライト＋盗難紛失op 150円 150 1.5万円 5万円以下 ○ ○ × ○ ○ 3,000円 13.3% 2024年度・費用保険・正味 低め 高 現行 紛失まで見る最安級。ただし上限は低い、水濡れなし。 https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png independent lowlimit under200 cheap theft loss">
+<td class="brand">
+<a class="logo-box" href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">
+<img alt="イオン少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png"/>
+<span class="fallback">イオン少額短期</span>
+</a>
+<div class="brand-name">イオン少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スーパーライト＋盗難紛失OP</strong>
+</td>
+<td class="price">150円</td>
+<td class="limit">1.5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-midlow" title="イオン少額短期 2024年度・費用保険・正味 / 紛失まで見る最安級。ただし上限は低い、水濡れなし。">
+<strong>13.3%</strong>
+<span>低め</span>
+</td>
+<td class="source"><a href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit theft loss" data-group="独立型" data-band="5万円以下" data-price="230" data-search="独立型 イオン少額短期 イオン少額短期 ライト＋盗難紛失op 230円 230 2.5万円 5万円以下 ○ ○ × ○ ○ 3,000円 13.3% 2024年度・費用保険・正味 低め 高 現行 150円より上限を少し上げる中間案。水濡れなし。 https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png independent lowlimit theft loss">
+<td class="brand">
+<a class="logo-box" href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">
+<img alt="イオン少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png"/>
+<span class="fallback">イオン少額短期</span>
+</a>
+<div class="brand-name">イオン少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ライト＋盗難紛失OP</strong>
+</td>
+<td class="price">230円</td>
+<td class="limit">2.5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-midlow" title="イオン少額短期 2024年度・費用保険・正味 / 150円より上限を少し上げる中間案。水濡れなし。">
+<strong>13.3%</strong>
+<span>低め</span>
+</td>
+<td class="source"><a href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit theft loss recommend" data-group="独立型" data-band="5万円以下" data-price="370" data-search="独立型 イオン少額短期 イオン少額短期 スタンダード＋盗難紛失op 370円 370 5万円 5万円以下 ○ ○ × ○ ○ 3,000円 13.3% 2024年度・費用保険・正味 低め 高 現行 5万円部門の本命候補。ただし水濡れなし。 https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png independent lowlimit theft loss recommend">
+<td class="brand">
+<a class="logo-box" href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">
+<img alt="イオン少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.aeonssi.co.jp/lp/sm-ssi/afs/old-assets/images/kv-title.png"/>
+<span class="fallback">イオン少額短期</span>
+</a>
+<div class="brand-name">イオン少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スタンダード＋盗難紛失OP</strong>
+<span class="badge rec">候補</span>
+</td>
+<td class="price">370円</td>
+<td class="limit">5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-midlow" title="イオン少額短期 2024年度・費用保険・正味 / 5万円部門の本命候補。ただし水濡れなし。">
+<strong>13.3%</strong>
+<span>低め</span>
+</td>
+<td class="source"><a href="https://www.aeonssi.co.jp/lp/sm-ssi/afs/smartphone.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit under200 water" data-group="独立型" data-band="5万円以下" data-price="190" data-search="独立型 povo / au少額短期 au少額短期 povoのスマホ保険 シンプル 190円 190 5万円 5万円以下 ○ × ○ × × 3,000円 実績薄い 商品開始後の実績蓄積待ち 要観察 高 現行 破損・水濡れ。盗難・紛失なし。新品・中古・キャリア不問。 https://povo.jp/news/newsrelease/20260521_02/ https://povo.jp/cms/povo/img/common/logo.svg independent lowlimit under200 water">
+<td class="brand">
+<a class="logo-box" href="https://povo.jp/news/newsrelease/20260521_02/" rel="noopener" target="_blank">
+<img alt="povo / au少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://povo.jp/cms/povo/img/common/logo.svg"/>
+<span class="fallback">povo / au少額短期</span>
+</a>
+<div class="brand-name">povo / au少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>povoのスマホ保険 シンプル</strong>
+</td>
+<td class="price">190円</td>
+<td class="limit">5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-neutral" title="au少額短期 商品開始後の実績蓄積待ち / 破損・水濡れ。盗難・紛失なし。新品・中古・キャリア不問。">
+<strong>実績薄い</strong>
+<span>要観察</span>
+</td>
+<td class="source"><a href="https://povo.jp/news/newsrelease/20260521_02/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit water theft recommend" data-group="独立型" data-band="5万円以下" data-price="270" data-search="独立型 povo / au少額短期 au少額短期 povoのスマホ保険 スタンダード5 270円 270 5万円 5万円以下 ○ ○ ○ ○ × 3,000円 実績薄い 商品開始後の実績蓄積待ち 要観察 高 現行 5万円で水濡れ・故障・盗難まで。紛失なし。 https://povo.jp/news/newsrelease/20260521_02/ https://povo.jp/cms/povo/img/common/logo.svg independent lowlimit water theft recommend">
+<td class="brand">
+<a class="logo-box" href="https://povo.jp/news/newsrelease/20260521_02/" rel="noopener" target="_blank">
+<img alt="povo / au少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://povo.jp/cms/povo/img/common/logo.svg"/>
+<span class="fallback">povo / au少額短期</span>
+</a>
+<div class="brand-name">povo / au少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>povoのスマホ保険 スタンダード5</strong>
+<span class="badge rec">候補</span>
+</td>
+<td class="price">270円</td>
+<td class="limit">5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-neutral" title="au少額短期 商品開始後の実績蓄積待ち / 5万円で水濡れ・故障・盗難まで。紛失なし。">
+<strong>実績薄い</strong>
+<span>要観察</span>
+</td>
+<td class="source"><a href="https://povo.jp/news/newsrelease/20260521_02/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent ten water theft" data-group="独立型" data-band="10万円" data-price="380" data-search="独立型 povo / au少額短期 au少額短期 povoのスマホ保険 スタンダード10 380円 380 10万円 10万円 ○ ○ ○ ○ × 3,000円 実績薄い 商品開始後の実績蓄積待ち 要観察 高 現行 10万円で安い。紛失なし。 https://povo.jp/news/newsrelease/20260521_02/ https://povo.jp/cms/povo/img/common/logo.svg independent ten water theft">
+<td class="brand">
+<a class="logo-box" href="https://povo.jp/news/newsrelease/20260521_02/" rel="noopener" target="_blank">
+<img alt="povo / au少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://povo.jp/cms/povo/img/common/logo.svg"/>
+<span class="fallback">povo / au少額短期</span>
+</a>
+<div class="brand-name">povo / au少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>povoのスマホ保険 スタンダード10</strong>
+</td>
+<td class="price">380円</td>
+<td class="limit">10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-neutral" title="au少額短期 商品開始後の実績蓄積待ち / 10万円で安い。紛失なし。">
+<strong>実績薄い</strong>
+<span>要観察</span>
+</td>
+<td class="source"><a href="https://povo.jp/news/newsrelease/20260521_02/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit under200 damage" data-group="独立型" data-band="5万円以下" data-price="200" data-search="独立型 ニッセイ＋ ニッセイプラス少額短期 スマホ保険 シンプルプラン 200円 200 5万円 5万円以下 ○ × × × × 3,000円 22.7%※ 2023年度・費用保険・正味 / 最新値要確認 低め 中 現行 破損だけ。画面割れ対策として分かりやすい。 https://www.nissay-plus.co.jp/smaho-hoken-001 https://www.nissay-plus.co.jp/assets/003/images/fv_logo.webp independent lowlimit under200 damage">
+<td class="brand">
+<a class="logo-box" href="https://www.nissay-plus.co.jp/smaho-hoken-001" rel="noopener" target="_blank">
+<img alt="ニッセイ＋ logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.nissay-plus.co.jp/assets/003/images/fv_logo.webp"/>
+<span class="fallback">ニッセイ＋</span>
+</a>
+<div class="brand-name">ニッセイ＋</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 シンプルプラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">200円</td>
+<td class="limit">5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-midlow" title="ニッセイプラス少額短期 2023年度・費用保険・正味 / 最新値要確認 / 破損だけ。画面割れ対策として分かりやすい。">
+<strong>22.7%※</strong>
+<span>低め</span>
+</td>
+<td class="source"><a href="https://www.nissay-plus.co.jp/smaho-hoken-001" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent ten water theft" data-group="独立型" data-band="10万円" data-price="400" data-search="独立型 ニッセイ＋ ニッセイプラス少額短期 スマホ保険 安心プラン 400円 400 10万円 10万円 ○ ○ ○ ○ × 3,000円 22.7%※ 2023年度・費用保険・正味 / 最新値要確認 低め 中 現行 水濡れ・故障・盗難まで。紛失は対象外。 https://www.nissay-plus.co.jp/smaho-hoken-001 https://www.nissay-plus.co.jp/assets/003/images/fv_logo.webp independent ten water theft">
+<td class="brand">
+<a class="logo-box" href="https://www.nissay-plus.co.jp/smaho-hoken-001" rel="noopener" target="_blank">
+<img alt="ニッセイ＋ logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.nissay-plus.co.jp/assets/003/images/fv_logo.webp"/>
+<span class="fallback">ニッセイ＋</span>
+</a>
+<div class="brand-name">ニッセイ＋</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 安心プラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">400円</td>
+<td class="limit">10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">3,000円</td>
+<td class="ratio ratio-midlow" title="ニッセイプラス少額短期 2023年度・費用保険・正味 / 最新値要確認 / 水濡れ・故障・盗難まで。紛失は対象外。">
+<strong>22.7%※</strong>
+<span>低め</span>
+</td>
+<td class="source"><a href="https://www.nissay-plus.co.jp/smaho-hoken-001" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent under200 cheap ten" data-group="独立型" data-band="10万円" data-price="100" data-search="独立型 スマホケ ワランティ少額短期 故障のみ 100円 100 10万円通算 10万円 × ○ × × × 0円 56.4% 2024年度・費用保険・正味 自然 高 現行 故障のみ。最安級のお守り枠。 https://sumahoke.jp/ https://sumahoke.jp/assets/image/logo_sumahoke.svg independent under200 cheap ten">
+<td class="brand">
+<a class="logo-box" href="https://sumahoke.jp/" rel="noopener" target="_blank">
+<img alt="スマホケ logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://sumahoke.jp/assets/image/logo_sumahoke.svg"/>
+<span class="fallback">スマホケ</span>
+</a>
+<div class="brand-name">スマホケ</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>故障のみ</strong>
+</td>
+<td class="price">100円</td>
+<td class="limit">10万円通算<span>10万円</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-ok" title="ワランティ少額短期 2024年度・費用保険・正味 / 故障のみ。最安級のお守り枠。">
+<strong>56.4%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://sumahoke.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent under200 ten water" data-group="独立型" data-band="10万円" data-price="200" data-search="独立型 スマホケ ワランティ少額短期 故障＋水濡れ 200円 200 10万円通算 10万円 × ○ ○ × × 5,000円 56.4% 2024年度・費用保険・正味 自然 高 現行 水濡れ寄り。破損・盗難・紛失は見ない。 https://sumahoke.jp/ https://sumahoke.jp/assets/image/logo_sumahoke.svg independent under200 ten water">
+<td class="brand">
+<a class="logo-box" href="https://sumahoke.jp/" rel="noopener" target="_blank">
+<img alt="スマホケ logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://sumahoke.jp/assets/image/logo_sumahoke.svg"/>
+<span class="fallback">スマホケ</span>
+</a>
+<div class="brand-name">スマホケ</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>故障＋水濡れ</strong>
+</td>
+<td class="price">200円</td>
+<td class="limit">10万円通算<span>10万円</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">5,000円</td>
+<td class="ratio ratio-ok" title="ワランティ少額短期 2024年度・費用保険・正味 / 水濡れ寄り。破損・盗難・紛失は見ない。">
+<strong>56.4%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://sumahoke.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent ten water theft" data-group="独立型" data-band="10万円" data-price="400" data-search="独立型 スマホケ ワランティ少額短期 故障＋破損＋水濡れ＋盗難 400円 400 10万円通算 10万円 ○ ○ ○ ○ × 5,000円 56.4% 2024年度・費用保険・正味 自然 高 現行 全部入り。損害率は自然だが紛失なし。 https://sumahoke.jp/ https://sumahoke.jp/assets/image/logo_sumahoke.svg independent ten water theft">
+<td class="brand">
+<a class="logo-box" href="https://sumahoke.jp/" rel="noopener" target="_blank">
+<img alt="スマホケ logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://sumahoke.jp/assets/image/logo_sumahoke.svg"/>
+<span class="fallback">スマホケ</span>
+</a>
+<div class="brand-name">スマホケ</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>故障＋破損＋水濡れ＋盗難</strong>
+</td>
+<td class="price">400円</td>
+<td class="limit">10万円通算<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">5,000円</td>
+<td class="ratio ratio-ok" title="ワランティ少額短期 2024年度・費用保険・正味 / 全部入り。損害率は自然だが紛失なし。">
+<strong>56.4%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://sumahoke.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent lowlimit water theft loss recommend" data-group="独立型" data-band="5万円以下" data-price="320" data-search="独立型 ソニー少額短期 ソニー少額短期 スマホ保険 6万円プラン 320円 320 6万円 5万円以下 ○ ○ ○ ○ ○ 2,500円 50.1% 2024年度・正味 自然 高 現行 5万円では少し不安な人向け。新品/認定中古・購入3年以内。 https://smartphone.sony-sasti.jp/ https://smartphone.sony-sasti.jp/_assets/logo_sonysyoutan.dqrygihb_z1sjasr.svg independent lowlimit water theft loss recommend">
+<td class="brand">
+<a class="logo-box" href="https://smartphone.sony-sasti.jp/" rel="noopener" target="_blank">
+<img alt="ソニー少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://smartphone.sony-sasti.jp/_assets/logo_sonysyoutan.DQrYgIHb_Z1SjAsr.svg"/>
+<span class="fallback">ソニー少額短期</span>
+</a>
+<div class="brand-name">ソニー少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 6万円プラン</strong>
+<span class="badge rec">候補</span>
+</td>
+<td class="price">320円</td>
+<td class="limit">6万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">2,500円</td>
+<td class="ratio ratio-ok" title="ソニー少額短期 2024年度・正味 / 5万円では少し不安な人向け。新品/認定中古・購入3年以内。">
+<strong>50.1%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://smartphone.sony-sasti.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent over10 water theft loss" data-group="独立型" data-band="10万円超" data-price="570" data-search="独立型 ソニー少額短期 ソニー少額短期 スマホ保険 12万円プラン 570円 570 12万円 10万円超 ○ ○ ○ ○ ○ 2,500円 50.1% 2024年度・正味 自然 高 現行 10万円では少し不安な人向け。 https://smartphone.sony-sasti.jp/ https://smartphone.sony-sasti.jp/_assets/logo_sonysyoutan.dqrygihb_z1sjasr.svg independent over10 water theft loss">
+<td class="brand">
+<a class="logo-box" href="https://smartphone.sony-sasti.jp/" rel="noopener" target="_blank">
+<img alt="ソニー少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://smartphone.sony-sasti.jp/_assets/logo_sonysyoutan.DQrYgIHb_Z1SjAsr.svg"/>
+<span class="fallback">ソニー少額短期</span>
+</a>
+<div class="brand-name">ソニー少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 12万円プラン</strong>
+</td>
+<td class="price">570円</td>
+<td class="limit">12万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">2,500円</td>
+<td class="ratio ratio-ok" title="ソニー少額短期 2024年度・正味 / 10万円では少し不安な人向け。">
+<strong>50.1%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://smartphone.sony-sasti.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent over10 over20 water theft loss recommend" data-group="独立型" data-band="10万円超" data-price="980" data-search="独立型 ソニー少額短期 ソニー少額短期 スマホ保険 24万円プラン 980円 980 24万円 10万円超 ○ ○ ○ ○ ○ 2,500円 50.1% 2024年度・正味 自然 高 現行 24万円まで。盗難・紛失は最大12万円寄り。 https://smartphone.sony-sasti.jp/ https://smartphone.sony-sasti.jp/_assets/logo_sonysyoutan.dqrygihb_z1sjasr.svg independent over10 over20 water theft loss recommend">
+<td class="brand">
+<a class="logo-box" href="https://smartphone.sony-sasti.jp/" rel="noopener" target="_blank">
+<img alt="ソニー少額短期 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://smartphone.sony-sasti.jp/_assets/logo_sonysyoutan.DQrYgIHb_Z1SjAsr.svg"/>
+<span class="fallback">ソニー少額短期</span>
+</a>
+<div class="brand-name">ソニー少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 24万円プラン</strong>
+<span class="badge rec">候補</span>
+</td>
+<td class="price">980円</td>
+<td class="limit">24万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">2,500円</td>
+<td class="ratio ratio-ok" title="ソニー少額短期 2024年度・正味 / 24万円まで。盗難・紛失は最大12万円寄り。">
+<strong>50.1%</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://smartphone.sony-sasti.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent ten water" data-group="独立型" data-band="10万円" data-price="400" data-search="独立型 paypayほけん チューリッヒ少額短期 スマホ保険 お手軽プラン 400円 400 破損10万円 / 水濡れ1万円 10万円 ○ × ○ × × 5,500円 5.8%※ 2024年度・費用保険・正味 / 商品単体前 かなり低い 中 現行 破損・水濡れ。故障・盗難・紛失なし。 https://www.paypay-insurance.co.jp/promotion/smartphone/app/ https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png independent ten water">
+<td class="brand">
+<a class="logo-box" href="https://www.paypay-insurance.co.jp/promotion/smartphone/app/" rel="noopener" target="_blank">
+<img alt="PayPayほけん logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png"/>
+<span class="fallback">PayPayほけん</span>
+</a>
+<div class="brand-name">PayPayほけん</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 お手軽プラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">400円</td>
+<td class="limit">破損10万円 / 水濡れ1万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">5,500円</td>
+<td class="ratio ratio-low" title="チューリッヒ少額短期 2024年度・費用保険・正味 / 商品単体前 / 破損・水濡れ。故障・盗難・紛失なし。">
+<strong>5.8%※</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.paypay-insurance.co.jp/promotion/smartphone/app/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent ten water" data-group="独立型" data-band="10万円" data-price="600" data-search="独立型 paypayほけん チューリッヒ少額短期 スマホ保険 基本プラン 600円 600 故障5万円 / 水濡れ10万円 10万円 ○ ○ ○ × × 5,500円 5.8%※ 2024年度・費用保険・正味 / 商品単体前 かなり低い 中 現行 故障追加。盗難・紛失なし。免責重め。 https://www.paypay-insurance.co.jp/promotion/smartphone/app/ https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png independent ten water">
+<td class="brand">
+<a class="logo-box" href="https://www.paypay-insurance.co.jp/promotion/smartphone/app/" rel="noopener" target="_blank">
+<img alt="PayPayほけん logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png"/>
+<span class="fallback">PayPayほけん</span>
+</a>
+<div class="brand-name">PayPayほけん</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 基本プラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">600円</td>
+<td class="limit">故障5万円 / 水濡れ10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">5,500円</td>
+<td class="ratio ratio-low" title="チューリッヒ少額短期 2024年度・費用保険・正味 / 商品単体前 / 故障追加。盗難・紛失なし。免責重め。">
+<strong>5.8%※</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.paypay-insurance.co.jp/promotion/smartphone/app/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent over10 water theft" data-group="独立型" data-band="10万円超" data-price="900" data-search="独立型 paypayほけん チューリッヒ少額短期 スマホ保険 安心プラン 900円 900 水濡れ20万円 / 故障・盗難10万円 10万円超 ○ ○ ○ ○ × 5,500円 5.8%※ 2024年度・費用保険・正味 / 商品単体前 かなり低い 中 現行 盗難まで。紛失なし。水濡れ上限は20万円。 https://www.paypay-insurance.co.jp/promotion/smartphone/app/ https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png independent over10 water theft">
+<td class="brand">
+<a class="logo-box" href="https://www.paypay-insurance.co.jp/promotion/smartphone/app/" rel="noopener" target="_blank">
+<img alt="PayPayほけん logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png"/>
+<span class="fallback">PayPayほけん</span>
+</a>
+<div class="brand-name">PayPayほけん</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>スマホ保険 安心プラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">900円</td>
+<td class="limit">水濡れ20万円 / 故障・盗難10万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">5,500円</td>
+<td class="ratio ratio-low" title="チューリッヒ少額短期 2024年度・費用保険・正味 / 商品単体前 / 盗難まで。紛失なし。水濡れ上限は20万円。">
+<strong>5.8%※</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.paypay-insurance.co.jp/promotion/smartphone/app/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="5万円以下" data-price="590" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 2万円補償 590円 590 2万円 5万円以下 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 2万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">590円</td>
+<td class="limit">2万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="5万円以下" data-price="610" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 3万円補償 610円 610 3万円 5万円以下 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 3万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">610円</td>
+<td class="limit">3万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="5万円以下" data-price="650" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 5万円補償 650円 650 5万円 5万円以下 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 5万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">650円</td>
+<td class="limit">5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="10万円" data-price="690" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 7万円補償 690円 690 7万円 10万円 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 7万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">690円</td>
+<td class="limit">7万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="10万円" data-price="740" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 9万円補償 740円 740 9万円 10万円 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 9万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">740円</td>
+<td class="limit">9万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="10万円超" data-price="780" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 11万円補償 780円 780 11万円 10万円超 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 11万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">780円</td>
+<td class="limit">11万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="10万円超" data-price="820" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 13万円補償 820円 820 13万円 10万円超 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 13万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">820円</td>
+<td class="limit">13万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="independent asahi water" data-group="独立型" data-band="10万円超" data-price="860" data-search="独立型 あさひ少額短期 あさひ少額短期 ケータイ電話修理費用保険 15万円補償 860円 860 15万円 10万円超 ○ ○ ○ × × 要確認 2.7% 2024年度・正味 かなり低い 中 現行 端末価格連動型。修理不能時は保険金額の1/2限度。 https://asahi-ssi.jp/service.php  independent asahi water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">
+<span class="fallback show">あさひ少額短期</span>
+</a>
+<div class="brand-name">あさひ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">独立型</div>
+<strong>ケータイ電話修理費用保険 15万円補償</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">860円</td>
+<td class="limit">15万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="あさひ少額短期 2024年度・正味 / 端末価格連動型。修理不能時は保険金額の1/2限度。">
+<strong>2.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://asahi-ssi.jp/service.php" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="multi ten water theft" data-group="複数端末型" data-band="10万円" data-price="700" data-search="複数端末型 モバイル保険 さくら少額短期 モバイル保険 700円 700 年間10万円 10万円 ○ ○ ○ ○ × 0円 4.7% 2024年度・費用保険・正味 かなり低い 高 現行 3端末まで。1台高額スマホではなく複数端末向け。 https://mobile-hoken.com/ https://mobile-hoken.com/images/common/header-logo.png multi ten water theft">
+<td class="brand">
+<a class="logo-box" href="https://mobile-hoken.com/" rel="noopener" target="_blank">
+<img alt="モバイル保険 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://mobile-hoken.com/images/common/header-logo.png"/>
+<span class="fallback">モバイル保険</span>
+</a>
+<div class="brand-name">モバイル保険</div>
+</td>
+<td class="product">
+<div class="group-pill">複数端末型</div>
+<strong>モバイル保険</strong>
+</td>
+<td class="price">700円</td>
+<td class="limit">年間10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-low" title="さくら少額短期 2024年度・費用保険・正味 / 3端末まで。1台高額スマホではなく複数端末向け。">
+<strong>4.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://mobile-hoken.com/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="multi ten water theft" data-group="複数端末型" data-band="10万円" data-price="700" data-search="複数端末型 ヤマダ さくら少額短期 つながる機器の保険 700円 700 年間10万円 10万円 ○ ○ ○ ○ × 0円 4.7% 2024年度・費用保険・正味 かなり低い 高 現行 3端末まで。修理不能・盗難は主端末2.5万円上限。 https://www.ymd-ssi.jp/lp/lp09/  multi ten water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.ymd-ssi.jp/lp/lp09/" rel="noopener" target="_blank">
+<span class="fallback show">ヤマダ</span>
+</a>
+<div class="brand-name">ヤマダ</div>
+</td>
+<td class="product">
+<div class="group-pill">複数端末型</div>
+<strong>つながる機器の保険</strong>
+</td>
+<td class="price">700円</td>
+<td class="limit">年間10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-low" title="さくら少額短期 2024年度・費用保険・正味 / 3端末まで。修理不能・盗難は主端末2.5万円上限。">
+<strong>4.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.ymd-ssi.jp/lp/lp09/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="multi ten water theft" data-group="複数端末型" data-band="10万円" data-price="700" data-search="複数端末型 エディオン さくら少額短期 モバイルe保険 700円 700 年間10万円 10万円 ○ ○ ○ ○ × 0円 4.7% 2024年度・費用保険・正味 かなり低い 高 現行 3台まで。年間10万円まで修理費用補償。 https://www.sakura-ssi.co.jp/mobile-e-hoken/  multi ten water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.sakura-ssi.co.jp/mobile-e-hoken/" rel="noopener" target="_blank">
+<span class="fallback show">エディオン</span>
+</a>
+<div class="brand-name">エディオン</div>
+</td>
+<td class="product">
+<div class="group-pill">複数端末型</div>
+<strong>モバイルe保険</strong>
+</td>
+<td class="price">700円</td>
+<td class="limit">年間10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-low" title="さくら少額短期 2024年度・費用保険・正味 / 3台まで。年間10万円まで修理費用補償。">
+<strong>4.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.sakura-ssi.co.jp/mobile-e-hoken/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="multi over10 over20 water theft loss review" data-group="複数端末型" data-band="10万円超" data-price="99999" data-search="複数端末型 エディオン さくら少額短期 モバイルe保険pro 要確認 99999 年間20万円 10万円超 ○ ○ ○ ○ ○ 要確認 4.7% 2024年度・費用保険・正味 かなり低い 低 現行 年間20万円・3端末。月額は要公式確認。紛失や弁護士費用も含む説明あり。 https://www.sakura-ssi.co.jp/mobile-e-hoken-pro/  multi over10 over20 water theft loss review">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.sakura-ssi.co.jp/mobile-e-hoken-pro/" rel="noopener" target="_blank">
+<span class="fallback show">エディオン</span>
+</a>
+<div class="brand-name">エディオン</div>
+</td>
+<td class="product">
+<div class="group-pill">複数端末型</div>
+<strong>モバイルe保険PRO</strong>
+<span class="badge conf">低</span>
+</td>
+<td class="price">要確認</td>
+<td class="limit">年間20万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-low" title="さくら少額短期 2024年度・費用保険・正味 / 年間20万円・3端末。月額は要公式確認。紛失や弁護士費用も含む説明あり。">
+<strong>4.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.sakura-ssi.co.jp/mobile-e-hoken-pro/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="multi ten water theft family" data-group="複数端末型" data-band="10万円" data-price="680" data-search="複数端末型 j:com ジェイコム少額短期 家族のスマホ保険 2台 680円 680 2台で修理10万円 / 再取得5万円 10万円 ○ ○ ○ ○ × 0円 3.0% 2024年度・費用保険・正味 かなり低い 高 現行 2台以上前提。発売5年以内・中古可。 https://www.jcom.co.jp/service/ssi/kazoku_sumaho/ https://www.jcom.co.jp/common_v10/images/logo-jcom.svg multi ten water theft family">
+<td class="brand">
+<a class="logo-box" href="https://www.jcom.co.jp/service/ssi/kazoku_sumaho/" rel="noopener" target="_blank">
+<img alt="J:COM logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.jcom.co.jp/common_v10/images/logo-jcom.svg"/>
+<span class="fallback">J:COM</span>
+</a>
+<div class="brand-name">J:COM</div>
+</td>
+<td class="product">
+<div class="group-pill">複数端末型</div>
+<strong>家族のスマホ保険 2台</strong>
+</td>
+<td class="price">680円</td>
+<td class="limit">2台で修理10万円 / 再取得5万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-low" title="ジェイコム少額短期 2024年度・費用保険・正味 / 2台以上前提。発売5年以内・中古可。">
+<strong>3.0%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.jcom.co.jp/service/ssi/kazoku_sumaho/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="multi over10 water theft" data-group="複数端末型" data-band="10万円超" data-price="800" data-search="複数端末型 あんしんスマホ保険 さくら少額短期 あんしんスマホ保険 800円 800 年間12万円 10万円超 ○ ○ ○ ○ × 0円 4.7% 2024年度・費用保険・正味 かなり低い 高 現行 3台まで、年12万円まで。スマホ以外のモバイル機器も対象。 https://www.sakura-ssi.co.jp/anshin-sumaho/service.html  multi over10 water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.sakura-ssi.co.jp/anshin-sumaho/service.html" rel="noopener" target="_blank">
+<span class="fallback show">あんしんスマホ保険</span>
+</a>
+<div class="brand-name">あんしんスマホ保険</div>
+</td>
+<td class="product">
+<div class="group-pill">複数端末型</div>
+<strong>あんしんスマホ保険</strong>
+</td>
+<td class="price">800円</td>
+<td class="limit">年間12万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">0円</td>
+<td class="ratio ratio-low" title="さくら少額短期 2024年度・費用保険・正味 / 3台まで、年12万円まで。スマホ以外のモバイル機器も対象。">
+<strong>4.7%</strong>
+<span>かなり低い</span>
+</td>
+<td class="source"><a href="https://www.sakura-ssi.co.jp/anshin-sumaho/service.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service ten water review" data-group="サービス付帯型" data-band="10万円" data-price="550" data-search="サービス付帯型 bicon / 安心デバイスcare 要確認 安心デバイスcare 550円 550 通信端末修理費用保険付き 10万円 ○ ○ ○ 要確認 × 要確認 要確認 付帯保険の引受会社要確認 要確認 中 現行 データ復旧・かけつけサポート付き。上限は公式/約款確認推奨。 https://www.andevcare.com/  service ten water review">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.andevcare.com/" rel="noopener" target="_blank">
+<span class="fallback show">Bicon / 安心デバイスCare</span>
+</a>
+<div class="brand-name">Bicon / 安心デバイスCare</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>安心デバイスCare</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">550円</td>
+<td class="limit">通信端末修理費用保険付き<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">要確認</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 付帯保険の引受会社要確認 / データ復旧・かけつけサポート付き。上限は公式/約款確認推奨。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.andevcare.com/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service over10 over20 water review" data-group="サービス付帯型" data-band="10万円超" data-price="880" data-search="サービス付帯型 bicon 要確認 安心デバイスcareプラス 880円 880 20万円 / 年3回まで 10万円超 ○ ○ ○ 要確認 × 要確認 要確認 付帯保険の引受会社要確認 要確認 中 現行 ビックカメラ系。通信端末修理費用保険が特典。 https://www.biccamera.com/bc/i/topics/phone/bicon/index.jsp  service over10 over20 water review">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.biccamera.com/bc/i/topics/phone/bicon/index.jsp" rel="noopener" target="_blank">
+<span class="fallback show">Bicon</span>
+</a>
+<div class="brand-name">Bicon</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>安心デバイスCareプラス</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">880円</td>
+<td class="limit">20万円 / 年3回まで<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">要確認</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 付帯保険の引受会社要確認 / ビックカメラ系。通信端末修理費用保険が特典。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.biccamera.com/bc/i/topics/phone/bicon/index.jsp" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service lowlimit water theft" data-group="サービス付帯型" data-band="5万円以下" data-price="980" data-search="サービス付帯型 @nifty さくら損保系 安心メールパック aプラン 980円 980 修理可能5万円 5万円以下 ○ ○ ○ ○ × 要確認 41.0%目安 損保会社側目安 / 要確認 自然 中 現行 メール/専門家相談サービス付帯。事前登録不要。 https://setsuzoku.nifty.com/mailpack/compensation/  service lowlimit water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://setsuzoku.nifty.com/mailpack/compensation/" rel="noopener" target="_blank">
+<span class="fallback show">@nifty</span>
+</a>
+<div class="brand-name">@nifty</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>安心メールパック Aプラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">980円</td>
+<td class="limit">修理可能5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-ok" title="さくら損保系 損保会社側目安 / 要確認 / メール/専門家相談サービス付帯。事前登録不要。">
+<strong>41.0%目安</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://setsuzoku.nifty.com/mailpack/compensation/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service over10 water theft" data-group="サービス付帯型" data-band="10万円超" data-price="1280" data-search="サービス付帯型 @nifty さくら損保系 安心メールパック bプラン 1,280円 1280 修理可能15万円 10万円超 ○ ○ ○ ○ × 要確認 41.0%目安 損保会社側目安 / 要確認 自然 中 現行 高額端末向け付帯型。 https://setsuzoku.nifty.com/mailpack/compensation/  service over10 water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://setsuzoku.nifty.com/mailpack/compensation/" rel="noopener" target="_blank">
+<span class="fallback show">@nifty</span>
+</a>
+<div class="brand-name">@nifty</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>安心メールパック Bプラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">1,280円</td>
+<td class="limit">修理可能15万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-ok" title="さくら損保系 損保会社側目安 / 要確認 / 高額端末向け付帯型。">
+<strong>41.0%目安</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://setsuzoku.nifty.com/mailpack/compensation/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service over10 over20 water theft" data-group="サービス付帯型" data-band="10万円超" data-price="1780" data-search="サービス付帯型 @nifty さくら損保系 安心メールパック cプラン 1,780円 1780 修理可能30万円 10万円超 ○ ○ ○ ○ × 要確認 41.0%目安 損保会社側目安 / 要確認 自然 中 現行 高額・家族端末まで見る付帯型。月額は重い。 https://setsuzoku.nifty.com/mailpack/compensation/  service over10 over20 water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://setsuzoku.nifty.com/mailpack/compensation/" rel="noopener" target="_blank">
+<span class="fallback show">@nifty</span>
+</a>
+<div class="brand-name">@nifty</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>安心メールパック Cプラン</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">1,780円</td>
+<td class="limit">修理可能30万円<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-ok" title="さくら損保系 損保会社側目安 / 要確認 / 高額・家族端末まで見る付帯型。月額は重い。">
+<strong>41.0%目安</strong>
+<span>自然</span>
+</td>
+<td class="source"><a href="https://setsuzoku.nifty.com/mailpack/compensation/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service lowlimit water" data-group="サービス付帯型" data-band="5万円以下" data-price="660" data-search="サービス付帯型 ウィズ少額短期 ウィズ少額短期 セーフティwi-fi / モバイル端末保険 660円 660 修理5万円 / 修理不能2.5万円 5万円以下 ○ ○ ○ × × 要確認 要確認 要確認 要確認 高 現行 wi-fi/かけつけサポート付き。保険料部分450円。 https://www.with-ssi.com/services/mobile_devices_hoken.pdf  service lowlimit water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.with-ssi.com/services/mobile_devices_hoken.pdf" rel="noopener" target="_blank">
+<span class="fallback show">ウィズ少額短期</span>
+</a>
+<div class="brand-name">ウィズ少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>セーフティWi-Fi / モバイル端末保険</strong>
+</td>
+<td class="price">660円</td>
+<td class="limit">修理5万円 / 修理不能2.5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="ウィズ少額短期 要確認 / Wi-Fi/かけつけサポート付き。保険料部分450円。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.with-ssi.com/services/mobile_devices_hoken.pdf" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service lowlimit water" data-group="サービス付帯型" data-band="5万円以下" data-price="770" data-search="サービス付帯型 ケイタイサポート(m) 要確認 ケイタイサポート(m) 770円 770 最大5万円 5万円以下 ○ ○ ○ × × 要確認 要確認 要確認 要確認 中 現行 かけつけサポート＋通信端末修理費用保険。 https://ksm.slp-contents.com/  service lowlimit water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://ksm.slp-contents.com/" rel="noopener" target="_blank">
+<span class="fallback show">ケイタイサポート(M)</span>
+</a>
+<div class="brand-name">ケイタイサポート(M)</div>
+</td>
+<td class="product">
+<div class="group-pill">サービス付帯型</div>
+<strong>ケイタイサポート(M)</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">770円</td>
+<td class="limit">最大5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 要確認 / かけつけサポート＋通信端末修理費用保険。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://ksm.slp-contents.com/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service isp ten water" data-group="地域/ISP付帯型" data-band="10万円" data-price="99999" data-search="地域/isp付帯型 ピカラモバイル 要確認 通信端末修理費用保険 セットオプション 99999 年間最大10万円 10万円 ○ ○ ○ × × 要確認 要確認 要確認 要確認 中 現行 あんしんパックに含まれる。単体申込み不可。 https://www.pikara.jp/mobile/option/anshin-shuuri.html  service isp ten water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.pikara.jp/mobile/option/anshin-shuuri.html" rel="noopener" target="_blank">
+<span class="fallback show">ピカラモバイル</span>
+</a>
+<div class="brand-name">ピカラモバイル</div>
+</td>
+<td class="product">
+<div class="group-pill">地域/ISP付帯型</div>
+<strong>通信端末修理費用保険</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">セットオプション</td>
+<td class="limit">年間最大10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 要確認 / あんしんパックに含まれる。単体申込み不可。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.pikara.jp/mobile/option/anshin-shuuri.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service isp ten water" data-group="地域/ISP付帯型" data-band="10万円" data-price="550" data-search="地域/isp付帯型 kcn 要確認 安心サポート ワイド +550円 550 年間最大10万円 10万円 ○ ○ ○ 要確認 × 要確認 要確認 要確認 要確認 中 現行 kcnサービス契約者向け。代表例として掲載。 https://www.kcn.jp/support/anshin/wide.html  service isp ten water">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.kcn.jp/support/anshin/wide.html" rel="noopener" target="_blank">
+<span class="fallback show">KCN</span>
+</a>
+<div class="brand-name">KCN</div>
+</td>
+<td class="product">
+<div class="group-pill">地域/ISP付帯型</div>
+<strong>安心サポート ワイド</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">+550円</td>
+<td class="limit">年間最大10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">要確認</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 要確認 / KCNサービス契約者向け。代表例として掲載。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.kcn.jp/support/anshin/wide.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="service isp water review" data-group="地域/ISP付帯型" data-band="10万円" data-price="99999" data-search="地域/isp付帯型 accs 要確認 メッシュwi-fi+ 通信端末修理費用保険 セットオプション 99999 要確認 10万円 ○ ○ ○ × × 要確認 要確認 要確認 要確認 中 現行 accsメッシュwi-fi+契約者向け。代表例として掲載。 https://www.accs.or.jp/accsnet/insurance  service isp water review">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.accs.or.jp/accsnet/insurance" rel="noopener" target="_blank">
+<span class="fallback show">ACCS</span>
+</a>
+<div class="brand-name">ACCS</div>
+</td>
+<td class="product">
+<div class="group-pill">地域/ISP付帯型</div>
+<strong>メッシュWi-Fi+ 通信端末修理費用保険</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">セットオプション</td>
+<td class="limit">要確認<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 要確認 / ACCSメッシュWi-Fi+契約者向け。代表例として掲載。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.accs.or.jp/accsnet/insurance" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="purchase lowlimit water theft used" data-group="購入連動型" data-band="5万円以下" data-price="528" data-search="購入連動型 ムスビー 要確認 なんでも端末安心パック 5万円 528円 528 年間5万円 5万円以下 ○ ○ ○ ○ × 要確認 要確認 販売チャネル/特典型 要確認 中 現行 中古スマホ購入者向け。購入/取引連動型。 https://www.musbi.net/nandemotap/  purchase lowlimit water theft used">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.musbi.net/nandemotap/" rel="noopener" target="_blank">
+<span class="fallback show">ムスビー</span>
+</a>
+<div class="brand-name">ムスビー</div>
+</td>
+<td class="product">
+<div class="group-pill">購入連動型</div>
+<strong>なんでも端末安心パック 5万円</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">528円</td>
+<td class="limit">年間5万円<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 販売チャネル/特典型 / 中古スマホ購入者向け。購入/取引連動型。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.musbi.net/nandemotap/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="purchase ten water theft used" data-group="購入連動型" data-band="10万円" data-price="748" data-search="購入連動型 ムスビー 要確認 なんでも端末安心パック 10万円 748円 748 年間10万円 10万円 ○ ○ ○ ○ × 要確認 要確認 販売チャネル/特典型 要確認 中 現行 中古スマホ購入者向け。購入/取引連動型。 https://www.musbi.net/nandemotap/  purchase ten water theft used">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.musbi.net/nandemotap/" rel="noopener" target="_blank">
+<span class="fallback show">ムスビー</span>
+</a>
+<div class="brand-name">ムスビー</div>
+</td>
+<td class="product">
+<div class="group-pill">購入連動型</div>
+<strong>なんでも端末安心パック 10万円</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">748円</td>
+<td class="limit">年間10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="要確認 販売チャネル/特典型 / 中古スマホ購入者向け。購入/取引連動型。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.musbi.net/nandemotap/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="purchase ten water" data-group="購入連動型" data-band="10万円" data-price="99999" data-search="購入連動型 paypayオークション系 paypayほけん あんしん修理 都度 99999 落札金額5,000円〜10万円 10万円 ○ 要確認 ○ × × 要確認 要確認 購入連動型 要確認 中 現行 月額保険ではなく購入・落札に紐づく保険。 https://www.paypay-insurance.co.jp/scenario/auc/ https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png purchase ten water">
+<td class="brand">
+<a class="logo-box" href="https://www.paypay-insurance.co.jp/scenario/auc/" rel="noopener" target="_blank">
+<img alt="PayPayオークション系 logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://about.paypay.ne.jp/assets/pr/20211202_01_img_logo.png"/>
+<span class="fallback">PayPayオークション系</span>
+</a>
+<div class="brand-name">PayPayオークション系</div>
+</td>
+<td class="product">
+<div class="group-pill">購入連動型</div>
+<strong>あんしん修理</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">都度</td>
+<td class="limit">落札金額5,000円〜10万円<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">要確認</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-unknown" title="PayPayほけん 購入連動型 / 月額保険ではなく購入・落札に紐づく保険。">
+<strong>要確認</strong>
+<span>要確認</span>
+</td>
+<td class="source"><a href="https://www.paypay-insurance.co.jp/scenario/auc/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="card ten water theft" data-group="カード付帯型" data-band="10万円" data-price="0" data-search="カード付帯型 jcb jcb付帯 jcbスマートフォン保険 カード年会費内 0 3万/5万/10万円など 10万円 ○ × ○ ○ × 1万円 / 盗難1.5万円 — カード付帯のため対象外 対象外 高 現行 通信料をjcbカードで支払う等の条件。券種で上限差。 https://www.jcb.co.jp/insurance/sp-insurance/index.html https://www.jcb.co.jp/common/images/jcb_logo.svg card ten water theft">
+<td class="brand">
+<a class="logo-box" href="https://www.jcb.co.jp/insurance/sp-insurance/index.html" rel="noopener" target="_blank">
+<img alt="JCB logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" src="https://www.jcb.co.jp/common/images/jcb_logo.svg"/>
+<span class="fallback">JCB</span>
+</a>
+<div class="brand-name">JCB</div>
+</td>
+<td class="product">
+<div class="group-pill">カード付帯型</div>
+<strong>JCBスマートフォン保険</strong>
+</td>
+<td class="price">カード年会費内</td>
+<td class="limit">3万/5万/10万円など<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">1万円 / 盗難1.5万円</td>
+<td class="ratio ratio-neutral" title="JCB付帯 カード付帯のため対象外 / 通信料をJCBカードで支払う等の条件。券種で上限差。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://www.jcb.co.jp/insurance/sp-insurance/index.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="card water theft" data-group="カード付帯型" data-band="10万円" data-price="0" data-search="カード付帯型 三井住友カード カード付帯 スマホ安心プラン カード年会費内 0 カード種別による 10万円 ○ 要確認 ○ △ × 要確認 — カード付帯のため対象外 対象外 高 現行 選べる無料保険。初期設定/切替条件あり。 https://www.smbc-card.com/mem/service/hoken/hoken_dousan.jsp  card water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.smbc-card.com/mem/service/hoken/hoken_dousan.jsp" rel="noopener" target="_blank">
+<span class="fallback show">三井住友カード</span>
+</a>
+<div class="brand-name">三井住友カード</div>
+</td>
+<td class="product">
+<div class="group-pill">カード付帯型</div>
+<strong>スマホ安心プラン</strong>
+</td>
+<td class="price">カード年会費内</td>
+<td class="limit">カード種別による<span>10万円</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">要確認</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark maybe">△</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-neutral" title="カード付帯 カード付帯のため対象外 / 選べる無料保険。初期設定/切替条件あり。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://www.smbc-card.com/mem/service/hoken/hoken_dousan.jsp" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="card lowlimit theft" data-group="カード付帯型" data-band="5万円以下" data-price="370" data-search="カード付帯型 セゾン カード付帯/少額短期 super value plus スマホ補償付き お買物安心保険 370円 370 要確認 5万円以下 ○ × 要確認 ○ × 要確認 — カード付帯/会員向け 対象外 中 現行 携行品/カード購入品補償寄り。紛失・置き忘れは対象外。 https://okane-recipe.saisoncard.co.jp/hoken/svp/shopping/  card lowlimit theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://okane-recipe.saisoncard.co.jp/hoken/svp/shopping/" rel="noopener" target="_blank">
+<span class="fallback show">セゾン</span>
+</a>
+<div class="brand-name">セゾン</div>
+</td>
+<td class="product">
+<div class="group-pill">カード付帯型</div>
+<strong>Super Value Plus スマホ補償付き お買物安心保険</strong>
+<span class="badge conf">中</span>
+</td>
+<td class="price">370円</td>
+<td class="limit">要確認<span>5万円以下</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark maybe">要確認</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-neutral" title="カード付帯/少額短期 カード付帯/会員向け / 携行品/カード購入品補償寄り。紛失・置き忘れは対象外。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://okane-recipe.saisoncard.co.jp/hoken/svp/shopping/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="card over10 water theft" data-group="カード付帯型" data-band="10万円超" data-price="0" data-search="カード付帯型 american express カード付帯 スマートフォン・プロテクション カード年会費内 0 3万円/15万円など券種別 10万円超 ○ × ○ ○ × 要確認 — カード付帯のため対象外 対象外 高 現行 カード券種・通信料支払い条件あり。 https://www.americanexpress.com/ja-jp/benefits/insurance/nac-insurance/smartphone-protection/  card over10 water theft">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://www.americanexpress.com/ja-jp/benefits/insurance/nac-insurance/smartphone-protection/" rel="noopener" target="_blank">
+<span class="fallback show">American Express</span>
+</a>
+<div class="brand-name">American Express</div>
+</td>
+<td class="product">
+<div class="group-pill">カード付帯型</div>
+<strong>スマートフォン・プロテクション</strong>
+</td>
+<td class="price">カード年会費内</td>
+<td class="limit">3万円/15万円など券種別<span>10万円超</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark yes">○</span></td>
+<td><span class="mark no">×</span></td>
+<td class="deductible">要確認</td>
+<td class="ratio ratio-neutral" title="カード付帯 カード付帯のため対象外 / カード券種・通信料支払い条件あり。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://www.americanexpress.com/ja-jp/benefits/insurance/nac-insurance/smartphone-protection/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="excluded stopped" data-group="除外/停止" data-band="除外" data-price="99999" data-search="除外/停止 スマホの保険証 — スマホの保険証 — 99999 — 除外 — — — — — — — 新規受付停止/要確認 対象外 中 新規停止 過去比較で出るが、新規受付停止/再開未定扱い。 https://his-mobile.com/news20230512.html  excluded stopped">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://his-mobile.com/news20230512.html" rel="noopener" target="_blank">
+<span class="fallback show">スマホの保険証</span>
+</a>
+<div class="brand-name">スマホの保険証</div>
+</td>
+<td class="product">
+<div class="group-pill">除外/停止</div>
+<strong>スマホの保険証</strong>
+<span class="badge stop">新規停止</span><span class="badge conf">中</span>
+</td>
+<td class="price">—</td>
+<td class="limit">—<span>除外</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td class="deductible">—</td>
+<td class="ratio ratio-neutral" title="— 新規受付停止/要確認 / 過去比較で出るが、新規受付停止/再開未定扱い。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://his-mobile.com/news20230512.html" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="excluded stopped" data-group="除外/停止" data-band="除外" data-price="99999" data-search="除外/停止 mysurance mysurance こどもスマホ保険 — 99999 — 除外 — — — — — — — 販売停止 対象外 中 販売停止 2024年7月31日販売停止扱い。学生スマホ保険とは別。 https://faq.mysurance.co.jp/  excluded stopped">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://faq.mysurance.co.jp/" rel="noopener" target="_blank">
+<span class="fallback show">Mysurance</span>
+</a>
+<div class="brand-name">Mysurance</div>
+</td>
+<td class="product">
+<div class="group-pill">除外/停止</div>
+<strong>こどもスマホ保険</strong>
+<span class="badge stop">販売停止</span><span class="badge conf">中</span>
+</td>
+<td class="price">—</td>
+<td class="limit">—<span>除外</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td class="deductible">—</td>
+<td class="ratio ratio-neutral" title="Mysurance 販売停止 / 2024年7月31日販売停止扱い。学生スマホ保険とは別。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://faq.mysurance.co.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr><tr data-tags="excluded business" data-group="除外" data-band="除外" data-price="500" data-search="除外 あおぞら少額短期 あおぞら少額短期 端末保険 500円 500 10万円 除外 — — — — — — — 対象外 対象外 中 対象外 個人スマホではなく決済端末向けに見えるため本編除外。 https://tanmatu-entry.assi.co.jp/  excluded business">
+<td class="brand">
+<a class="logo-box fallback-only" href="https://tanmatu-entry.assi.co.jp/" rel="noopener" target="_blank">
+<span class="fallback show">あおぞら少額短期</span>
+</a>
+<div class="brand-name">あおぞら少額短期</div>
+</td>
+<td class="product">
+<div class="group-pill">除外</div>
+<strong>端末保険</strong>
+<span class="badge stop">対象外</span><span class="badge conf">中</span>
+</td>
+<td class="price">500円</td>
+<td class="limit">10万円<span>除外</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td><span class="mark neutral">—</span></td>
+<td class="deductible">—</td>
+<td class="ratio ratio-neutral" title="あおぞら少額短期 対象外 / 個人スマホではなく決済端末向けに見えるため本編除外。">
+<strong>—</strong>
+<span>対象外</span>
+</td>
+<td class="source"><a href="https://tanmatu-entry.assi.co.jp/" rel="noopener" target="_blank">公式</a></td>
+</tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const buttons = document.querySelectorAll('button[data-filter]');
+const rows = [...document.querySelectorAll('#db tbody tr')];
+const q = document.getElementById('q');
+const shownCount = document.getElementById('shownCount');
+let activeFilter = 'all';
+
+function matchFilter(row, filter) {
+  if (filter === 'all') return true;
+  const tags = (row.dataset.tags || '').split(' ');
+  return tags.includes(filter);
+}
+
+function apply() {
+  const term = q.value.trim().toLowerCase();
+  let count = 0;
+  rows.forEach(row => {
+    const byFilter = matchFilter(row, activeFilter);
+    const bySearch = !term || (row.dataset.search || '').includes(term);
+    const show = byFilter && bySearch;
+    row.classList.toggle('hidden', !show);
+    if (show) count++;
+  });
+  shownCount.textContent = count;
+}
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    apply();
+  });
+});
+
+q.addEventListener('input', apply);
+apply();
+</script>
+</body>
+</html>
